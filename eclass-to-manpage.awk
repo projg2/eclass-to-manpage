@@ -1,14 +1,13 @@
 # Copyright 1999-2007 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.1 2007/06/16 08:07:34 vapier Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.2 2007/07/24 07:59:21 vapier Exp $
 
-# This awk converts the comment documentation found in elcasses
+# This awk converts the comment documentation found in eclasses
 # into man pages for easier/nicer reading.
 #
 # If you wish to have multiple paragraphs in a description, then
-# create comment lines which contain a single space.  Paragraph
-# parsing ends when te comment block does, or when a comment line
-# without anything on it is encountered.
+# create empty comment lines.  Paragraph parsing ends when the comment
+# block does.
 #
 # The format of the eclass description:
 # @ECLASS: foo.eclass
@@ -42,15 +41,15 @@ function fail(text) {
 
 function eat_line() {
 	ret = $0
-	sub(/^# @[A-Z]*: /,"",ret)
+	sub(/^# @[A-Z]*:[[:space:]]*/,"",ret)
 	getline
 	return ret
 }
 function eat_paragraph() {
 	ret = ""
 	getline
-	while ($0 ~ /^# ([^@]|$)/) {
-		sub(/^# /,"",$0)
+	while ($0 ~ /^#($| [^@])/) {
+		sub(/^#[[:space:]]*/,"",$0)
 		ret = ret "\n" $0
 		getline
 	}
