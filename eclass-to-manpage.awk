@@ -1,6 +1,6 @@
 # Copyright 1999-2007 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.4 2007/08/07 01:48:02 vapier Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.5 2007/08/07 03:11:50 vapier Exp $
 
 # This awk converts the comment documentation found in eclasses
 # into man pages for easier/nicer reading.
@@ -28,15 +28,16 @@
 # @DESCRIPTION:
 # <required; blurb about this function>
 
+# The format of variables:
+# @VARIABLE: foo
+# @DESCRIPTION:
+# <required; blurb about this variable>
+
 # Common features:
 # @CODE
 # In multiline paragraphs, you can create chunks of unformatted
 # code by using this marker at the start and end.
 # @CODE
-
-BEGIN {
-	state = "header"
-}
 
 function warn(text) {
 	print FILENAME ": " text > "/dev/stderr"
@@ -77,9 +78,10 @@ function man_text(p) {
 	return gensub(/-/, "\\-", "g", p)
 }
 
-{
-if (state == "header") {
-if ($0 ~ /^# @ECLASS:/) {
+#
+# Handle an @ECLASS block
+#
+function handle_eclass() {
 	eclass = $3
 	eclass_maintainer = ""
 	blurb = ""
@@ -119,11 +121,12 @@ if ($0 ~ /^# @ECLASS:/) {
 		warn("no @MAINTAINER found")
 
 	print ".SH \"FUNCTIONS\""
-
-	state = "functions"
 }
-} else if (state == "functions") {
-if ($0 ~ /^# @FUNCTION:/) {
+
+#
+# Handle a @FUNCTION block
+#
+function handle_function() {
 	func_name = $3
 	usage = ""
 	funcret = ""
@@ -153,23 +156,76 @@ if ($0 ~ /^# @FUNCTION:/) {
 	if (desc == "")
 		fail("no @DESCRIPTION found")
 }
-}
+
+#
+# Handle a @VARIABLE block
+#
+function handle_variable() {
+	var_name = $3
+	desc = ""
+
+	# grab the docs
+	getline
+	if ($2 == "@DESCRIPTION:")
+		desc = eat_paragraph()
+
+	# now print out the stuff
+	print ".TP"
+	print ".B " var_name
+	print man_text(desc)
+
+	if (desc == "")
+		fail("no @DESCRIPTION found")
 }
 
+#
+# Spit out the common footer of manpage
+#
+function handle_footer() {
+	#print ".SH \"AUTHORS\""
+	# hmm, how to handle ?  someone will probably whine if we dont ...
+	if (eclass_maintainer != "") {
+		print ".SH \"MAINTAINERS\""
+		print man_text(eclass_maintainer)
+	}
+	print ".SH \"REPORTING BUGS\""
+	print "Please report bugs via http://bugs.gentoo.org/"
+	print ".SH \"FILES\""
+	print ".BR /usr/portage/eclass/" eclass
+	print ".SH \"SEE ALSO\""
+	print ".BR ebuild (5)"
+}
+
+#
+# Init parser
+#
+BEGIN {
+	state = "header"
+}
+
+#
+# Main parsing routine
+#
+{
+	if (state == "header") {
+		if ($0 ~ /^# @ECLASS:/) {
+			handle_eclass()
+			state = "funcvar"
+		}
+	} else if (state == "funcvar") {
+		if ($0 ~ /^# @FUNCTION:/)
+			handle_function()
+		else if ($0 ~ /^# @VARIABLE:/)
+			handle_variable()
+	}
+}
+
+#
+# Tail end
+#
 END {
-if (eclass == "")
-	fail("eclass not documented yet (no @ECLASS found)");
-
-#print ".SH \"AUTHORS\""
-# hmm, how to handle ?  someone will probably whine if we dont ...
-if (eclass_maintainer != "") {
-	print ".SH \"MAINTAINERS\""
-	print man_text(eclass_maintainer)
-}
-print ".SH \"REPORTING BUGS\""
-print "Please report bugs via http://bugs.gentoo.org/"
-print ".SH \"FILES\""
-print ".BR /usr/portage/eclass/" eclass
-print ".SH \"SEE ALSO\""
-print ".BR ebuild (5)"
+	if (eclass == "")
+		fail("eclass not documented yet (no @ECLASS found)");
+	else
+		handle_footer()
 }
