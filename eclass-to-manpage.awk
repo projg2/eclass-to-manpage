@@ -1,6 +1,6 @@
 # Copyright 1999-2007 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.3 2007/08/07 01:05:25 vapier Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.4 2007/08/07 01:48:02 vapier Exp $
 
 # This awk converts the comment documentation found in eclasses
 # into man pages for easier/nicer reading.
@@ -22,6 +22,7 @@
 # The format of functions:
 # @FUNCTION: foo
 # @USAGE: <required arguments to foo> [optional arguments to foo]
+# @RETURN: <whatever foo returns>
 # @MAINTAINER:
 # <optional; list of contacts, one per line>
 # @DESCRIPTION:
@@ -125,6 +126,7 @@ if ($0 ~ /^# @ECLASS:/) {
 if ($0 ~ /^# @FUNCTION:/) {
 	func_name = $3
 	usage = ""
+	funcret = ""
 	maintainer = ""
 	desc = ""
 
@@ -132,6 +134,8 @@ if ($0 ~ /^# @FUNCTION:/) {
 	getline
 	if ($2 == "@USAGE:")
 		usage = eat_line()
+	if ($2 == "@RETURN:")
+		funcret = eat_line()
 	if ($2 == "@MAINTAINER:")
 		maintainer = eat_paragraph()
 	if ($2 == "@DESCRIPTION:")
@@ -141,6 +145,8 @@ if ($0 ~ /^# @FUNCTION:/) {
 	print ".TP"
 	print "\\fB" func_name "\\fR " man_text(usage)
 	print man_text(desc)
+	if (funcret != "")
+		print "\nReturn value: " funcret
 
 	if (blurb == "")
 		fail("no @BLURB found")
