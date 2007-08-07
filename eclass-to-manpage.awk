@@ -1,6 +1,6 @@
 # Copyright 1999-2007 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.2 2007/07/24 07:59:21 vapier Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.3 2007/08/07 01:05:25 vapier Exp $
 
 # This awk converts the comment documentation found in eclasses
 # into man pages for easier/nicer reading.
@@ -27,6 +27,12 @@
 # @DESCRIPTION:
 # <required; blurb about this function>
 
+# Common features:
+# @CODE
+# In multiline paragraphs, you can create chunks of unformatted
+# code by using this marker at the start and end.
+# @CODE
+
 BEGIN {
 	state = "header"
 }
@@ -46,12 +52,21 @@ function eat_line() {
 	return ret
 }
 function eat_paragraph() {
+	code = 0
 	ret = ""
 	getline
 	while ($0 ~ /^#($| [^@])/) {
 		sub(/^#[[:space:]]*/,"",$0)
 		ret = ret "\n" $0
 		getline
+		if ($0 ~ /^# @CODE$/) {
+			if (code)
+				ret = ret "\n.fi"
+			else
+				ret = ret "\n.nf"
+			code = !code
+			getline
+		}
 	}
 	sub(/^\n/,"",ret)
 	return ret
@@ -139,16 +154,16 @@ END {
 if (eclass == "")
 	fail("eclass not documented yet (no @ECLASS found)");
 
-print ".SH \"REPORTING BUGS\""
-print "Please report bugs via http://bugs.gentoo.org/"
-print ".SH \"SEE ALSO\""
-print ".BR ebuild (5)"
-print ".SH \"FILES\""
-print ".BR /usr/portage/eclass/" eclass
 #print ".SH \"AUTHORS\""
 # hmm, how to handle ?  someone will probably whine if we dont ...
 if (eclass_maintainer != "") {
 	print ".SH \"MAINTAINERS\""
 	print man_text(eclass_maintainer)
 }
+print ".SH \"REPORTING BUGS\""
+print "Please report bugs via http://bugs.gentoo.org/"
+print ".SH \"FILES\""
+print ".BR /usr/portage/eclass/" eclass
+print ".SH \"SEE ALSO\""
+print ".BR ebuild (5)"
 }
