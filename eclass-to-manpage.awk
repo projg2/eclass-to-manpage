@@ -1,6 +1,6 @@
 # Copyright 1999-2007 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.5 2007/08/07 03:11:50 vapier Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.6 2007/08/25 13:41:42 vapier Exp $
 
 # This awk converts the comment documentation found in eclasses
 # into man pages for easier/nicer reading.
@@ -26,7 +26,7 @@
 # @MAINTAINER:
 # <optional; list of contacts, one per line>
 # @DESCRIPTION:
-# <required; blurb about this function>
+# <required if no @RETURN; blurb about this function>
 
 # The format of variables:
 # @VARIABLE: foo
@@ -147,13 +147,17 @@ function handle_function() {
 	# now print out the stuff
 	print ".TP"
 	print "\\fB" func_name "\\fR " man_text(usage)
-	print man_text(desc)
-	if (funcret != "")
-		print "\nReturn value: " funcret
+	if (desc != "")
+		print man_text(desc)
+	if (funcret != "") {
+		if (desc != "")
+			print ""
+		print "Return value: " funcret
+	}
 
 	if (blurb == "")
 		fail("no @BLURB found")
-	if (desc == "")
+	if (desc == "" && funcret == "")
 		fail("no @DESCRIPTION found")
 }
 
