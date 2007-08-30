@@ -1,6 +1,6 @@
 # Copyright 1999-2007 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.6 2007/08/25 13:41:42 vapier Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.7 2007/08/30 21:24:02 ulm Exp $
 
 # This awk converts the comment documentation found in eclasses
 # into man pages for easier/nicer reading.
@@ -57,8 +57,8 @@ function eat_paragraph() {
 	code = 0
 	ret = ""
 	getline
-	while ($0 ~ /^#($| [^@])/) {
-		sub(/^#[[:space:]]*/,"",$0)
+	while ($0 ~ /^#([[:space:]]*$|[[:space:]][^@])/) {
+		sub(/^#[[:space:]]?/,"",$0)
 		ret = ret "\n" $0
 		getline
 		if ($0 ~ /^# @CODE$/) {
