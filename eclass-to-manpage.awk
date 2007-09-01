@@ -1,6 +1,6 @@
 # Copyright 1999-2007 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.8 2007/09/01 03:49:05 vapier Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.9 2007/09/01 15:17:17 vapier Exp $
 
 # This awk converts the comment documentation found in eclasses
 # into man pages for easier/nicer reading.
@@ -178,16 +178,15 @@ function _handle_variable() {
 	getline
 	if ($2 == "@DESCRIPTION:")
 		desc = eat_paragraph()
-	while (1) {
-		val = $0
-		sub(/^[^=]*=/, "", val)
-		if ($0 == val)
-			warn(var_name ": unknown content between @DESCRIPTION and variable: " $0)
-		else
-			break
-		getline
-	}
-	val = " = \\fI" val "\\fR"
+
+	# extract the default variable value
+	val = $0
+	sub(/^[^=]*=/, "", val)
+	if ($0 == val) {
+		warn(var_name ": unable to extract default variable content: " $0)
+		val = ""
+	} else
+		val = " = \\fI" val "\\fR"
 
 	# now accumulate the stuff
 	ret = \
