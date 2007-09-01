@@ -1,6 +1,6 @@
 # Copyright 1999-2007 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.7 2007/08/30 21:24:02 ulm Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.8 2007/09/01 03:49:05 vapier Exp $
 
 # This awk converts the comment documentation found in eclasses
 # into man pages for easier/nicer reading.
@@ -28,8 +28,13 @@
 # @DESCRIPTION:
 # <required if no @RETURN; blurb about this function>
 
-# The format of variables:
+# The format of function-specific variables:
 # @VARIABLE: foo
+# @DESCRIPTION:
+# <required; blurb about this variable>
+
+# The format of eclass variables:
+# @ECLASS-VARIABLE: foo
 # @DESCRIPTION:
 # <required; blurb about this variable>
 
@@ -40,7 +45,7 @@
 # @CODE
 
 function warn(text) {
-	print FILENAME ": " text > "/dev/stderr"
+	print FILENAME ":" NR ": " text > "/dev/stderr"
 }
 function fail(text) {
 	warn(text)
@@ -57,8 +62,8 @@ function eat_paragraph() {
 	code = 0
 	ret = ""
 	getline
-	while ($0 ~ /^#([[:space:]]*$|[[:space:]][^@])/) {
-		sub(/^#[[:space:]]?/,"",$0)
+	while ($0 ~ /^#([[:space:]]*$| [^@])/) {
+		sub(/^#[[:space:]]?/, "", $0)
 		ret = ret "\n" $0
 		getline
 		if ($0 ~ /^# @CODE$/) {
@@ -114,11 +119,11 @@ function handle_eclass() {
 
 	# sanity checks
 	if (blurb == "")
-		fail("no @BLURB found")
+		fail(eclass ": no @BLURB found")
 	if (desc == "")
-		fail("no @DESCRIPTION found")
+		fail(eclass ": no @DESCRIPTION found")
 	if (eclass_maintainer == "")
-		warn("no @MAINTAINER found")
+		warn(eclass ": no @MAINTAINER found")
 
 	print ".SH \"FUNCTIONS\""
 }
@@ -156,36 +161,62 @@ function handle_function() {
 	}
 
 	if (blurb == "")
-		fail("no @BLURB found")
+		fail(func_name ": no @BLURB found")
 	if (desc == "" && funcret == "")
-		fail("no @DESCRIPTION found")
+		fail(func_name ": no @DESCRIPTION found")
 }
 
 #
-# Handle a @VARIABLE block
+# Handle @VARIABLE and @ECLASS-VARIABLE blocks
 #
-function handle_variable() {
+function _handle_variable() {
 	var_name = $3
 	desc = ""
+	val = ""
 
 	# grab the docs
 	getline
 	if ($2 == "@DESCRIPTION:")
 		desc = eat_paragraph()
+	while (1) {
+		val = $0
+		sub(/^[^=]*=/, "", val)
+		if ($0 == val)
+			warn(var_name ": unknown content between @DESCRIPTION and variable: " $0)
+		else
+			break
+		getline
+	}
+	val = " = \\fI" val "\\fR"
 
-	# now print out the stuff
-	print ".TP"
-	print ".B " var_name
-	print man_text(desc)
+	# now accumulate the stuff
+	ret = \
+		".TP" "\n" \
+		"\\fB" var_name "\\fR" val "\n" \
+		man_text(desc)
 
 	if (desc == "")
-		fail("no @DESCRIPTION found")
+		fail(var_name ": no @DESCRIPTION found")
+
+	return ret
+}
+function handle_variable() {
+	print _handle_variable()
+}
+function handle_eclass_variable() {
+	if (eclass_variables != "")
+		eclass_variables = eclass_variables "\n"
+	eclass_variables = eclass_variables _handle_variable()
 }
 
 #
 # Spit out the common footer of manpage
 #
 function handle_footer() {
+	if (eclass_variables != "") {
+		print ".SH \"ECLASS VARIABLES\""
+		print man_text(eclass_variables)
+	}
 	#print ".SH \"AUTHORS\""
 	# hmm, how to handle ?  someone will probably whine if we dont ...
 	if (eclass_maintainer != "") {
@@ -215,12 +246,17 @@ BEGIN {
 		if ($0 ~ /^# @ECLASS:/) {
 			handle_eclass()
 			state = "funcvar"
-		}
+		} else if ($0 ~ /^# @/)
+			warn("Unexpected tag in \"" state "\" state: " $0)
 	} else if (state == "funcvar") {
 		if ($0 ~ /^# @FUNCTION:/)
 			handle_function()
 		else if ($0 ~ /^# @VARIABLE:/)
 			handle_variable()
+		else if ($0 ~ /^# @ECLASS-VARIABLE:/)
+			handle_eclass_variable()
+		else if ($0 ~ /^# @/)
+			warn("Unexpected tag in \"" state "\" state: " $0)
 	}
 }
 
