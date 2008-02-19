@@ -1,6 +1,6 @@
 # Copyright 1999-2007 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.12 2008/02/19 05:14:08 vapier Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.13 2008/02/19 05:20:08 vapier Exp $
 
 # This awk converts the comment documentation found in eclasses
 # into man pages for easier/nicer reading.
@@ -258,6 +258,9 @@ BEGIN {
 		if ($0 ~ /^# @ECLASS:/) {
 			handle_eclass()
 			state = "funcvar"
+		} else if ($0 == "# @DEAD") {
+			eclass = "dead"
+			exit(0)
 		} else if ($0 ~ /^# @/)
 			warn("Unexpected tag in \"" state "\" state: " $0)
 	} else if (state == "funcvar") {
