@@ -1,6 +1,6 @@
 # Copyright 1999-2007 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.15 2009/12/09 10:15:57 vapier Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.16 2010/08/21 19:25:57 vapier Exp $
 
 # This awk converts the comment documentation found in eclasses
 # into man pages for easier/nicer reading.
@@ -30,12 +30,18 @@
 
 # The format of function-specific variables:
 # @VARIABLE: foo
+# [@DEFAULT_UNSET]
+# [@INTERNAL]
+# [@REQUIRED]
 # @DESCRIPTION:
 # <required; blurb about this variable>
 # foo="<default value>"
 
 # The format of eclass variables:
 # @ECLASS-VARIABLE: foo
+# [@DEFAULT_UNSET]
+# [@INTERNAL]
+# [@REQUIRED]
 # @DESCRIPTION:
 # <required; blurb about this variable>
 # foo="<default value>"
@@ -46,8 +52,14 @@
 # code by using this marker at the start and end.
 # @CODE
 
-function _stderr_msg(text, type) {
-	print FILENAME ":" NR ":" type ": " text > "/dev/stderr"
+function _stderr_msg(text, type,   file, cnt) {
+	if (_stderr_header_done != 1) {
+		cnt = split(FILENAME, file, /\//)
+		print "\n" file[cnt] ":" > "/dev/stderr"
+		_stderr_header_done = 1
+	}
+
+	print "   " type ":" NR ": " text > "/dev/stderr"
 }
 function warn(text) {
 	_stderr_msg(text, "warning")
@@ -185,9 +197,23 @@ function _handle_variable() {
 	var_name = $3
 	desc = ""
 	val = ""
+	default_unset = 0
+	internal = 0
+	required = 0
 
-	# grab the docs
-	getline
+	# grab the optional attributes
+	opts = 1
+	while (opts) {
+		getline
+		if ($2 == "@DEFAULT_UNSET")
+			default_unset = 1
+		else if ($2 == "@INTERNAL")
+			internal = 1
+		else if ($2 == "@REQUIRED")
+			required = 1
+		else
+			opts = 0
+	}
 	if ($2 == "@DESCRIPTION:")
 		desc = eat_paragraph()
 
@@ -202,13 +228,22 @@ function _handle_variable() {
 		regex = "^[[:space:]]*:[[:space:]]*[$]{" var_name ":?=(.*)}"
 		val = gensub(regex, "\\1", "", $0)
 		if (val == $0) {
-			warn(var_name ": unable to extract default variable content: " $0)
+			if (default_unset + required + internal == 0)
+				warn(var_name ": unable to extract default variable content: " $0)
 			val = ""
-		} else if (val !~ /^["']/ && val ~ / /)
+		} else if (val !~ /^["']/ && val ~ / /) {
+			if (default_unset == 1)
+				warn(var_name ": marked as unset, but has value: " val)
 			val = "\"" val "\""
+		}
 	}
 	if (length(val))
 		val = " " op " \\fI" val "\\fR"
+	if (required == 1)
+		val = val " (REQUIRED)"
+
+	if (internal == 1)
+		return ""
 
 	# now accumulate the stuff
 	ret = \
@@ -222,12 +257,18 @@ function _handle_variable() {
 	return ret
 }
 function handle_variable() {
-	print _handle_variable()
+	ret = _handle_variable()
+	if (ret == "")
+		return
+	print ret
 }
 function handle_eclass_variable() {
+	ret = _handle_variable()
+	if (ret == "")
+		return
 	if (eclass_variables != "")
 		eclass_variables = eclass_variables "\n"
-	eclass_variables = eclass_variables _handle_variable()
+	eclass_variables = eclass_variables ret
 }
 
 #
