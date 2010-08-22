@@ -1,6 +1,6 @@
-# Copyright 1999-2007 Gentoo Foundation
+# Copyright 1999-2010 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.16 2010/08/21 19:25:57 vapier Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.17 2010/08/22 23:10:55 vapier Exp $
 
 # This awk converts the comment documentation found in eclasses
 # into man pages for easier/nicer reading.
@@ -148,19 +148,25 @@ function handle_eclass() {
 		fail(eclass ": no @BLURB found")
 	if (eclass_maintainer == "")
 		warn(eclass ": no @MAINTAINER found")
-
-	print ".SH \"FUNCTIONS\""
 }
 
 #
 # Handle a @FUNCTION block
 #
+function show_function_header() {
+	if (_function_header_done != 1) {
+		print ".SH \"FUNCTIONS\""
+		_function_header_done = 1
+	}
+}
 function handle_function() {
 	func_name = $3
 	usage = ""
 	funcret = ""
 	maintainer = ""
 	desc = ""
+
+	show_function_header()
 
 	# grab the docs
 	getline
@@ -257,6 +263,7 @@ function _handle_variable() {
 	return ret
 }
 function handle_variable() {
+	show_function_header()
 	ret = _handle_variable()
 	if (ret == "")
 		return
