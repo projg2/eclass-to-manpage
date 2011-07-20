@@ -1,6 +1,6 @@
 # Copyright 1999-2011 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.21 2011/07/20 02:59:04 vapier Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.22 2011/07/20 03:11:05 vapier Exp $
 
 # This awk converts the comment documentation found in eclasses
 # into man pages for easier/nicer reading.
@@ -25,6 +25,7 @@
 # @RETURN: <whatever foo returns>
 # @MAINTAINER:
 # <optional; list of contacts, one per line>
+# [@INTERNAL]
 # @DESCRIPTION:
 # <required if no @RETURN; blurb about this function>
 
@@ -169,9 +170,8 @@ function handle_function() {
 	usage = ""
 	funcret = ""
 	maintainer = ""
+	internal = 0
 	desc = ""
-
-	show_function_header()
 
 	# grab the docs
 	getline
@@ -181,8 +181,17 @@ function handle_function() {
 		funcret = eat_line()
 	if ($2 == "@MAINTAINER:")
 		maintainer = eat_paragraph()
+	if ($2 == "@INTERNAL") {
+		internal = 1
+		getline
+	}
 	if ($2 == "@DESCRIPTION:")
 		desc = eat_paragraph()
+
+	if (internal == 1)
+		return
+
+	show_function_header()
 
 	# now print out the stuff
 	print ".TP"
