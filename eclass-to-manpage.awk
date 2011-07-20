@@ -1,6 +1,6 @@
 # Copyright 1999-2011 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.19 2011/02/10 07:26:07 ulm Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.20 2011/07/20 02:56:01 vapier Exp $
 
 # This awk converts the comment documentation found in eclasses
 # into man pages for easier/nicer reading.
@@ -300,7 +300,7 @@ function handle_footer() {
 	print ".SH \"REPORTING BUGS\""
 	print "Please report bugs via http://bugs.gentoo.org/"
 	print ".SH \"FILES\""
-	print ".BR /usr/portage/eclass/" eclass
+	print ".BR " eclassdir "/" eclass
 	print ".SH \"SEE ALSO\""
 	print ".BR ebuild (5)"
 }
@@ -310,6 +310,9 @@ function handle_footer() {
 #
 BEGIN {
 	state = "header"
+	if (PORTDIR == "")
+		PORTDIR = "/usr/portage"
+	eclassdir = PORTDIR "/eclass"
 }
 
 #
