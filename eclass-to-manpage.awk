@@ -1,6 +1,6 @@
 # Copyright 1999-2011 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.22 2011/07/20 03:11:05 vapier Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.23 2011/08/22 04:01:42 vapier Exp $
 
 # This awk converts the comment documentation found in eclasses
 # into man pages for easier/nicer reading.
@@ -13,6 +13,8 @@
 # @ECLASS: foo.eclass
 # @MAINTAINER:
 # <required; list of contacts, one per line>
+# @AUTHOR:
+# <optional; list of authors, one per line>
 # @BLURB: <required; short description>
 # @DESCRIPTION:
 # <optional; long description>
@@ -101,6 +103,10 @@ function eat_paragraph() {
 	return ret
 }
 
+function pre_text(p) {
+	return ".nf\n" p "\n.fi"
+}
+
 function man_text(p) {
 	return gensub(/-/, "\\-", "g", p)
 }
@@ -111,6 +117,7 @@ function man_text(p) {
 function handle_eclass() {
 	eclass = $3
 	eclass_maintainer = ""
+	eclass_author = ""
 	blurb = ""
 	desc = ""
 	example = ""
@@ -130,6 +137,8 @@ function handle_eclass() {
 	getline
 	if ($2 == "@MAINTAINER:")
 		eclass_maintainer = eat_paragraph()
+	if ($2 == "@AUTHOR:")
+		eclass_author = eat_paragraph()
 	if ($2 == "@BLURB:")
 		blurb = eat_line()
 	if ($2 == "@DESCRIPTION:")
@@ -300,11 +309,13 @@ function handle_footer() {
 		print ".SH \"ECLASS VARIABLES\""
 		print man_text(eclass_variables)
 	}
-	#print ".SH \"AUTHORS\""
-	# hmm, how to handle ?  someone will probably whine if we dont ...
+	if (eclass_author != "") {
+		print ".SH \"AUTHORS\""
+		print pre_text(man_text(eclass_author))
+	}
 	if (eclass_maintainer != "") {
 		print ".SH \"MAINTAINERS\""
-		print man_text(eclass_maintainer)
+		print pre_text(man_text(eclass_maintainer))
 	}
 	print ".SH \"REPORTING BUGS\""
 	print "Please report bugs via http://bugs.gentoo.org/"
