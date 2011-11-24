@@ -1,6 +1,6 @@
 # Copyright 1999-2011 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.24 2011/08/22 04:49:21 vapier Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.25 2011/11/24 00:05:41 vapier Exp $
 
 # This awk converts the comment documentation found in eclasses
 # into man pages for easier/nicer reading.
@@ -182,6 +182,11 @@ function handle_function() {
 	internal = 0
 	desc = ""
 
+	# make sure people haven't specified this before (copy & paste error)
+	if (all_funcs[func_name])
+		fail(eclass ": duplicate definition found for function: " func_name)
+	all_funcs[func_name] = func_name
+
 	# grab the docs
 	getline
 	if ($2 == "@USAGE:")
@@ -229,6 +234,11 @@ function _handle_variable() {
 	default_unset = 0
 	internal = 0
 	required = 0
+
+	# make sure people haven't specified this before (copy & paste error)
+	if (all_vars[var_name])
+		fail(eclass ": duplicate definition found for variable: " var_name)
+	all_vars[var_name] = var_name
 
 	# grab the optional attributes
 	opts = 1
