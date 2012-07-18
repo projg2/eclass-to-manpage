@@ -1,6 +1,6 @@
 # Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.26 2012/07/18 14:24:06 vapier Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.27 2012/07/18 14:27:54 vapier Exp $
 
 # This awk converts the comment documentation found in eclasses
 # into man pages for easier/nicer reading.
@@ -54,6 +54,10 @@
 # In multiline paragraphs, you can create chunks of unformatted
 # code by using this marker at the start and end.
 # @CODE
+#
+# @ROFF <some roff macros>
+# If you want a little more manual control over the formatting, you can
+# insert roff macros directly into the output by using the @ROFF escape.
 
 function _stderr_msg(text, type,   file, cnt) {
 	if (_stderr_header_done != 1) {
@@ -82,22 +86,37 @@ function eat_paragraph() {
 	code = 0
 	ret = ""
 	getline
-	while ($0 ~ /^#([[:space:]]*$|[[:space:]][^@])/) {
+	while ($0 ~ /^#/) {
+		# Only allow certain tokens in the middle of paragraphs
+		if ($2 ~ /^@/ && $2 !~ /^@(CODE|ROFF)$/)
+			break
+
 		sub(/^#[[:space:]]?/, "", $0)
+
+		# Escape . at start of line #420153
+		if ($0 ~ /^[.]/)
+			$0 = "\\&" $0
+
+		# Translate @CODE into @ROFF
+		if ($1 == "@CODE" && NF == 1) {
+			if (code)
+				$0 = "@ROFF .fi"
+			else
+				$0 = "@ROFF .nf"
+			code = !code
+		}
+
+		# Allow people to specify *roff commands directly
+		if ($1 == "@ROFF")
+			sub(/^@ROFF[[:space:]]*/, "", $0)
+
 		ret = ret "\n" $0
+
 		# Handle the common case of trailing backslashes in
 		# code blocks to cross multiple lines #335702
 		if (code && $NF == "\\")
 			ret = ret "\\"
 		getline
-		if ($0 ~ /^# @CODE$/) {
-			if (code)
-				ret = ret "\n.fi"
-			else
-				ret = ret "\n.nf"
-			code = !code
-			getline
-		}
 	}
 	sub(/^\n/,"",ret)
 	return ret
