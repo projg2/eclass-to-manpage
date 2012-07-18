@@ -1,6 +1,6 @@
-# Copyright 1999-2011 Gentoo Foundation
+# Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.25 2011/11/24 00:05:41 vapier Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-portage/eclass-manpages/files/eclass-to-manpage.awk,v 1.26 2012/07/18 14:24:06 vapier Exp $
 
 # This awk converts the comment documentation found in eclasses
 # into man pages for easier/nicer reading.
@@ -145,6 +145,9 @@ function handle_eclass() {
 		desc = eat_paragraph()
 	if ($2 == "@EXAMPLE:")
 		example = eat_paragraph()
+	# in case they typo-ed the keyword, bail now
+	if ($2 ~ /^@/)
+		fail(eclass ": unknown keyword " $2)
 
 	# finally display it
 	print ".SH \"NAME\""
