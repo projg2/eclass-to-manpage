@@ -6,14 +6,14 @@ ECLASSDIR = .
 ECLASSES = $(wildcard ${ECLASSDIR}/*.eclass)
 
 OUTDIR = .
-MANPAGES = $(patsubst ${ECLASSDIR}/%.eclass,${OUTDIR}/%.5,${ECLASSES})
+MANPAGES = $(patsubst ${ECLASSDIR}/%,${OUTDIR}/%.5,${ECLASSES})
 
 DESTDIR =
 PREFIX = /usr/local
 MANDIR = $(PREFIX)/share/man
 MAN5DIR = $(MANDIR)/man5
 
-${OUTDIR}/%.5: ${ECLASSDIR}/%.eclass
+${OUTDIR}/%.5: ${ECLASSDIR}/%
 	rm -f $@ $@.tmp
 	${AWK} -f ${SCRIPT} $< > $@.tmp || [ $$? -eq 77 ]
 	chmod a-w $@.tmp
