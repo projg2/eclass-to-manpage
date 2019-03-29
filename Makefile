@@ -6,8 +6,8 @@ ECLASSDIR = .
 ECLASSES = $(wildcard ${ECLASSDIR}/*.eclass)
 
 OUTDIR = .
-MANPAGES = $(patsubst ${ECLASSDIR}/%,${OUTDIR}/%.5,${ECLASSES})
-ERRFILES = $(patsubst ${ECLASSDIR}/%,${OUTDIR}/%.5.err,${ECLASSES})
+MANPAGES = $(sort $(patsubst ${ECLASSDIR}/%,${OUTDIR}/%.5,${ECLASSES}))
+ERRFILES = $(sort $(patsubst ${ECLASSDIR}/%,${OUTDIR}/%.5.err,${ECLASSES}))
 
 DESTDIR =
 PREFIX = /usr/local
