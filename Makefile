@@ -7,6 +7,7 @@ ECLASSES = $(wildcard ${ECLASSDIR}/*.eclass)
 
 OUTDIR = .
 MANPAGES = $(patsubst ${ECLASSDIR}/%,${OUTDIR}/%.5,${ECLASSES})
+ERRFILES = $(patsubst ${ECLASSDIR}/%,${OUTDIR}/%.5.err,${ECLASSES})
 
 DESTDIR =
 PREFIX = /usr/local
@@ -15,11 +16,12 @@ MAN5DIR = $(MANDIR)/man5
 
 ${OUTDIR}/%.5: ${ECLASSDIR}/%
 	rm -f $@ $@.tmp
-	${AWK} -f ${SCRIPT} $< > $@.tmp || [ $$? -eq 77 ]
+	${AWK} -f ${SCRIPT} $< > $@.tmp 2> $@.err || [ $$? -eq 77 ]
 	chmod a-w $@.tmp
 	mv $@.tmp $@
 
 all: ${MANPAGES}
+	cat ${ERRFILES}
 
 install: all
 	install -d -m 0755 ${DESTDIR}${MAN5DIR}
@@ -28,6 +30,6 @@ install: all
 	done
 
 clean:
-	rm -f ${MANPAGES}
+	rm -f ${MANPAGES} ${ERRFILES}
 
 .PHONY: all install clean
