@@ -21,7 +21,7 @@ ${OUTDIR}/%.5: ${ECLASSDIR}/%
 	mv $@.tmp $@
 
 all: ${MANPAGES}
-	cat ${ERRFILES}
+	[ -z "${ERRFILES}" ] || cat ${ERRFILES}
 
 install: all
 	install -d -m 0755 ${DESTDIR}${MAN5DIR}
