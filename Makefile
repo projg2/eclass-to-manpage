@@ -13,6 +13,7 @@ DESTDIR =
 PREFIX = /usr/local
 MANDIR = $(PREFIX)/share/man
 MAN5DIR = $(MANDIR)/man5
+DATADIR = $(PREFIX)/share/eclass-manpages
 
 DISTNAME = eclass-manpages-$(shell date "+%Y%m%d")
 DISTARCH = ${DISTNAME}.tar.xz
@@ -35,6 +36,8 @@ install: all
 	for f in ${MANPAGES}; do \
 		! [ -s "$${f}" ] || ${INSTALL} -m 0644 $${f} ${DESTDIR}${MAN5DIR}/; \
 	done
+	${INSTALL} -d -m 0755 ${DESTDIR}${DATADIR}
+	${INSTALL} -m 0644 ${SCRIPT} ${DESTDIR}${DATADIR}/
 
 clean:
 	rm -f ${MANPAGES} ${ERRFILES}
