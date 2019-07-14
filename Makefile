@@ -11,6 +11,7 @@ ERRFILES = $(sort $(patsubst ${ECLASSDIR}/%,${OUTDIR}/%.5.err,${ECLASSES}))
 
 DESTDIR =
 PREFIX = /usr/local
+BINDIR = $(PREFIX)/bin
 MANDIR = $(PREFIX)/share/man
 MAN5DIR = $(MANDIR)/man5
 
@@ -31,6 +32,8 @@ all: ${MANPAGES}
 	[ -z "${ERRFILES}" ] || cat ${ERRFILES}
 
 install: all
+	${INSTALL} -d -m 0755 ${DESTDIR}${BINDIR}
+	${INSTALL} -m 0755 ${SCRIPT} ${DESTDIR}${BINDIR}/
 	${INSTALL} -d -m 0755 ${DESTDIR}${MAN5DIR}
 	for f in ${MANPAGES}; do \
 		! [ -s "$${f}" ] || ${INSTALL} -m 0644 $${f} ${DESTDIR}${MAN5DIR}/; \
