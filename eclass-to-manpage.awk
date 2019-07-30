@@ -33,6 +33,7 @@
 # @MAINTAINER:
 # <optional; list of contacts, one per line>
 # [@INTERNAL]
+# [@INCLUDES_EPREFIX] (the function outputs path that includes ${EPREFIX})
 # @DESCRIPTION:
 # <required if no @RETURN; blurb about this function>
 
@@ -42,6 +43,7 @@
 # [@INTERNAL] (internal eclass use variable)
 # [@DEFAULT_UNSET]
 # [@REQUIRED]
+# [@INCLUDES_EPREFIX] (the variable is a path that includes ${EPREFIX})
 # @DESCRIPTION:
 # <required; blurb about this variable>
 # foo="<default value>"
@@ -54,6 +56,7 @@
 # [@INTERNAL] (internal eclass use variable)
 # [@DEFAULT_UNSET]
 # [@REQUIRED]
+# [@INCLUDES_EPREFIX] (the variable is a path that includes ${EPREFIX})
 # @DESCRIPTION:
 # <required; blurb about this variable>
 # foo="<default value>"
@@ -252,6 +255,10 @@ function handle_function() {
 		internal = 1
 		getline
 	}
+	if ($2 == "@INCLUDES_EPREFIX") {
+		includes_eprefix = 1
+		getline
+	}
 	if ($2 == "@DESCRIPTION:")
 		desc = eat_paragraph()
 
@@ -314,6 +321,8 @@ function _handle_variable() {
 			user_variable = 1
 		else if ($2 == "@OUTPUT_VARIABLE")
 			output_variable = 1
+		else if ($2 == "@INCLUDES_EPREFIX")
+			includes_eprefix = 1
 		else
 			opts = 0
 	}
