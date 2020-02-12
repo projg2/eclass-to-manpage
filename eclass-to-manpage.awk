@@ -142,7 +142,7 @@ function eat_paragraph() {
 }
 
 function pre_text(p) {
-	return ".nf\n" p "\n.fi"
+	return gensub(/\n/, "\n.br\n", "g", p)
 }
 
 function man_text(p) {
@@ -417,7 +417,8 @@ function handle_footer() {
 	print ".BR " eclass
 	print ".SH \"SEE ALSO\""
 	print ".BR ebuild (5)"
-	print pre_text(gensub("@ECLASS@", eclass, 1, vcs_url))
+	print ".br"
+	print gensub("@ECLASS@", eclass, 1, vcs_url)
 }
 
 #
