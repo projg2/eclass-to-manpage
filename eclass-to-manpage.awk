@@ -1,5 +1,5 @@
 #!/usr/bin/awk -f
-# Copyright 1999-2019 Gentoo Authors
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 # This awk converts the comment documentation found in eclasses
@@ -171,7 +171,8 @@ function handle_eclass() {
 	print ".\\\" See eclass-to-manpage.awk for documentation on how to get"
 	print ".\\\" your eclass nicely documented as well."
 	print ".\\\""
-	print ".TH \"" toupper(eclass) "\" 5 \"" strftime("%b %Y") "\" \"Portage\" \"portage\""
+	print ".TH \"" toupper(eclass) "\" 5 \"" strftime("%b %Y") "\"" \
+		" \"Gentoo Linux\" \"eclass-manpages\""
 
 	# now eat the global data
 	getline
