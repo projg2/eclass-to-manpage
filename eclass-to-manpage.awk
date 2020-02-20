@@ -70,9 +70,14 @@
 # code by using this marker at the start and end.
 # @CODE
 #
+# @SUBSECTION <title>
+# Insert a subsection heading.  Only allowed in the main @DESCRIPTION.
+#
 # @ROFF <some roff macros>
 # If you want a little more manual control over the formatting, you can
 # insert roff macros directly into the output by using the @ROFF escape.
+# Note:  The @ROFF token is deprecated and exists only for backwards
+# compatibility.  Do not use it in new documentation.
 
 function _stderr_msg(text, type,   file, cnt) {
 	if (_stderr_header_done != 1) {
@@ -107,7 +112,7 @@ function eat_paragraph() {
 	getline
 	while ($0 ~ /^#/) {
 		# Only allow certain tokens in the middle of paragraphs
-		if ($2 ~ /^@/ && $2 !~ /^@(CODE|ROFF)$/)
+		if ($2 ~ /^@/ && $2 !~ /^@(CODE|ROFF|SUBSECTION)$/)
 			break
 
 		sub(/^#[[:space:]]?/, "", $0)
@@ -116,18 +121,26 @@ function eat_paragraph() {
 		if ($0 ~ /^[.]/)
 			$0 = "\\&" $0
 
-		# Translate @CODE into @ROFF
+		# Translate @CODE into .nf/.fi pair
 		if ($1 == "@CODE" && NF == 1) {
 			if (code)
-				$0 = "@ROFF .fi"
+				$0 = ".fi"
 			else
-				$0 = "@ROFF .nf"
+				$0 = ".nf"
 			code = !code
 		}
 
+		# Insert a subsection heading
+		if ($1 == "@SUBSECTION") {
+			if (NF < 2) fail(eclass ": @SUBSECTION without title")
+			$1 = ".SS"
+		}
+
 		# Allow people to specify *roff commands directly
-		if ($1 == "@ROFF")
+		if ($1 == "@ROFF") {
+			warn(eclass ": the @ROFF tag is deprecated")
 			sub(/^@ROFF[[:space:]]*/, "", $0)
+		}
 
 		ret = ret "\n" $0
 
