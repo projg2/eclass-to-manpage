@@ -21,6 +21,7 @@
 # @VCSURL: <optional; url to vcs for this eclass; default: https://gitweb.gentoo.org/repo/gentoo.git/log/eclass/@ECLASS@>
 # @SUPPORTED_EAPIS: <optional; space-separated list of EAPIs>
 # @BLURB: <required; short description>
+# @DEPRECATED: <optional; replacement ("none" for no replacement)>
 # @DESCRIPTION:
 # <optional; long description>
 # @EXAMPLE:
@@ -34,6 +35,7 @@
 # <optional; list of contacts, one per line>
 # [@INTERNAL]
 # [@INCLUDES_EPREFIX] (the function outputs path that includes ${EPREFIX})
+# @DEPRECATED: <optional; replacement ("none" for no replacement)>
 # @DESCRIPTION:
 # <required if no @RETURN; blurb about this function>
 
@@ -44,6 +46,7 @@
 # [@DEFAULT_UNSET]
 # [@REQUIRED]
 # [@INCLUDES_EPREFIX] (the variable is a path that includes ${EPREFIX})
+# @DEPRECATED: <optional; replacement ("none" for no replacement)>
 # @DESCRIPTION:
 # <required; blurb about this variable>
 # foo="<default value>"
@@ -57,6 +60,7 @@
 # [@DEFAULT_UNSET]
 # [@REQUIRED]
 # [@INCLUDES_EPREFIX] (the variable is a path that includes ${EPREFIX})
+# @DEPRECATED: <optional; replacement ("none" for no replacement)>
 # @DESCRIPTION:
 # <required; blurb about this variable>
 # foo="<default value>"
@@ -171,6 +175,7 @@ function handle_eclass() {
 	eclass_author = ""
 	supported_eapis = ""
 	blurb = ""
+	deprecated = ""
 	desc = ""
 	example = ""
 
@@ -204,6 +209,8 @@ function handle_eclass() {
 		supported_eapis = eat_line()
 	if ($2 == "@BLURB:")
 		blurb = eat_line()
+	if ($2 == "@DEPRECATED:")
+		deprecated = eat_line()
 	if ($2 == "@DESCRIPTION:")
 		desc = eat_paragraph()
 	if ($2 == "@EXAMPLE:")
@@ -215,6 +222,10 @@ function handle_eclass() {
 	# finally display it
 	print ".SH \"NAME\""
 	print eclass " \\- " man_text(blurb)
+	if (deprecated != "") {
+		print ".SH \"DEPRECATED\""
+		print "Replacement: " man_text(deprecated)
+	}
 	if (desc != "") {
 		print ".SH \"DESCRIPTION\""
 		print man_text(desc)
@@ -250,6 +261,7 @@ function handle_function() {
 	funcret = ""
 	maintainer = ""
 	internal = 0
+	deprecated = ""
 	desc = ""
 
 	# make sure people haven't specified this before (copy & paste error)
@@ -273,6 +285,8 @@ function handle_function() {
 		includes_eprefix = 1
 		getline
 	}
+	if ($2 == "@DEPRECATED:")
+		deprecated = eat_line()
 	if ($2 == "@DESCRIPTION:")
 		desc = eat_paragraph()
 
@@ -303,6 +317,7 @@ function handle_function() {
 #
 function _handle_variable() {
 	var_name = $3
+	deprecated = ""
 	desc = ""
 	val = ""
 	default_unset = 0
@@ -340,6 +355,8 @@ function _handle_variable() {
 		else
 			opts = 0
 	}
+	if ($2 == "@DEPRECATED:")
+		deprecated = eat_line()
 	if ($2 == "@DESCRIPTION:")
 		desc = eat_paragraph()
 
