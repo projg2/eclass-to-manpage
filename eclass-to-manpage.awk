@@ -22,6 +22,7 @@
 # @SUPPORTED_EAPIS: <optional; space-separated list of EAPIs>
 # @BLURB: <required; short description>
 # @DEPRECATED: <optional; replacement ("none" for no replacement)>
+# @INDIRECT_ECLASSES: <optional; space-separated list of allowed indirect eclasses>
 # @DESCRIPTION:
 # <optional; long description>
 # @EXAMPLE:
@@ -176,6 +177,7 @@ function handle_eclass() {
 	supported_eapis = ""
 	blurb = ""
 	deprecated = ""
+	indirect_eclasses = ""
 	desc = ""
 	example = ""
 
@@ -211,6 +213,8 @@ function handle_eclass() {
 		blurb = eat_line()
 	if ($2 == "@DEPRECATED:")
 		deprecated = eat_line()
+	if ($2 == "@INDIRECT_ECLASSES:")
+		indirect_eclasses = eat_line()
 	if ($2 == "@DESCRIPTION:")
 		desc = eat_paragraph()
 	if ($2 == "@EXAMPLE:")
@@ -233,6 +237,10 @@ function handle_eclass() {
 	if (supported_eapis != "") {
 		print ".SH \"SUPPORTED EAPIS\""
 		print man_text(supported_eapis)
+	}
+	if (indirect_eclasses != "") {
+		print ".SH \"INDIRECT ECLASSES\""
+		print man_text(indirect_eclasses)
 	}
 	if (example != "") {
 		print ".SH \"EXAMPLE\""
