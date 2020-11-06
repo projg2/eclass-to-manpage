@@ -28,8 +28,8 @@ ${OUTDIR}/%.5: ${ECLASSDIR}/%
 	chmod a-w $@.tmp
 	mv $@.tmp $@
 
-all: ${MANPAGES}
-	[ -z "${ERRFILES}" ] || cat ${ERRFILES}
+all:
+	$(MAKE) -k ${MANPAGES}; ret=$$?; [ -z "${ERRFILES}" ] || cat ${ERRFILES}; exit $${ret}
 
 install: all
 	${INSTALL} -d -m 0755 ${DESTDIR}${BINDIR}
