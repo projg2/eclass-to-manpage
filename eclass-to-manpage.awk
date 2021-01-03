@@ -1,5 +1,5 @@
 #!/usr/bin/awk -f
-# Copyright 1999-2020 Gentoo Authors
+# Copyright 2007-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 # This awk converts the comment documentation found in eclasses
@@ -121,8 +121,8 @@ function eat_paragraph() {
 
 		sub(/^#[[:space:]]?/, "", $0)
 
-		# Escape . at start of line #420153
-		if ($0 ~ /^[.]/)
+		# Escape . and ' at start of line #420153
+		if ($0 ~ /^[.']/)
 			$0 = "\\&" $0
 
 		# Translate @CODE into .nf/.fi pair
