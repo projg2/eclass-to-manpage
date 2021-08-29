@@ -174,6 +174,7 @@ function handle_eclass() {
 	eclass_maintainer = ""
 	eclass_author = ""
 	supported_eapis = ""
+	provides = ""
 	blurb = ""
 	deprecated = ""
 	desc = ""
@@ -207,6 +208,8 @@ function handle_eclass() {
 		vcs_url = eat_line()
 	if ($2 == "@SUPPORTED_EAPIS:")
 		supported_eapis = eat_line()
+	if ($2 == "@PROVIDES:")
+		provides = eat_line()
 	if ($2 == "@BLURB:")
 		blurb = eat_line()
 	if ($2 == "@DEPRECATED:")
@@ -233,6 +236,10 @@ function handle_eclass() {
 	if (supported_eapis != "") {
 		print ".SH \"SUPPORTED EAPIS\""
 		print man_text(supported_eapis)
+	}
+	if (provides != "") {
+		print ".SH \"TRANSITIVELY PROVIDED ECLASSES\""
+		print man_text(provides)
 	}
 	if (example != "") {
 		print ".SH \"EXAMPLE\""
