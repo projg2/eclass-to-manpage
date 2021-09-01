@@ -20,6 +20,7 @@
 #  default: tell people to use bugs.gentoo.org>
 # @VCSURL: <optional; url to vcs for this eclass; default: https://gitweb.gentoo.org/repo/gentoo.git/log/eclass/@ECLASS@>
 # @SUPPORTED_EAPIS: <optional; space-separated list of EAPIs>
+# @PROVIDES: <optional; space-separated list of eclass names>
 # @BLURB: <required; short description>
 # @DEPRECATED: <optional; replacement ("none" for no replacement)>
 # @DESCRIPTION:
