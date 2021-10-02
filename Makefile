@@ -1,4 +1,5 @@
 AWK = gawk
+PRECONV = preconv
 INSTALL = install
 SCRIPT = eclass-to-manpage.awk
 
@@ -25,8 +26,9 @@ COMP = xz -9e
 ${OUTDIR}/%.5: ${ECLASSDIR}/%
 	rm -f $@ $@.tmp
 	${AWK} -f ${SCRIPT} $< > $@.tmp 2> $@.err || [ $$? -eq 77 ]
-	chmod a-w $@.tmp
-	mv $@.tmp $@
+	${PRECONV} -e utf-8 -r $@.tmp > $@
+	rm -f $@.tmp
+	chmod a-w $@
 
 all:
 	$(MAKE) -k ${MANPAGES}; ret=$$?; [ -z "${ERRFILES}" ] || cat ${ERRFILES}; exit $${ret}
