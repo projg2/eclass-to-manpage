@@ -1,5 +1,5 @@
 #!/usr/bin/awk -f
-# Copyright 2007-2021 Gentoo Authors
+# Copyright 2007-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 # This awk converts the comment documentation found in eclasses
@@ -53,7 +53,7 @@
 # foo="<default value>"
 
 # The format of eclass variables:
-# @ECLASS-VARIABLE: foo
+# @ECLASS_VARIABLE: foo
 # [@PRE_INHERIT] (the variable must be set before inheriting the eclass)
 # [@USER_VARIABLE] (set in make.conf, not ebuilds)
 # [@OUTPUT_VARIABLE] (set by eclass, to be read in ebuilds)
@@ -321,7 +321,7 @@ function handle_function() {
 }
 
 #
-# Handle @VARIABLE and @ECLASS-VARIABLE blocks
+# Handle @VARIABLE and @ECLASS_VARIABLE blocks
 #
 function _handle_variable() {
 	var_name = $3
@@ -493,7 +493,8 @@ BEGIN {
 			handle_function()
 		else if ($0 ~ /^# @VARIABLE:/)
 			handle_variable()
-		else if ($0 ~ /^# @ECLASS-VARIABLE:/)
+		else if ($0 ~ /^# @ECLASS[_-]VARIABLE:/)
+			# also recognize hyphen for backwards compatibility
 			handle_eclass_variable()
 		else if ($0 ~ /^# @/)
 			warn("Unexpected tag in \"" state "\" state: " $0)
