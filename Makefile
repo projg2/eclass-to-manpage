@@ -21,7 +21,7 @@ DISTARCH = ${DISTNAME}.tar.xz
 DISTFILES = COPYING Makefile eclass-to-manpage.awk
 TAR = tar --format=ustar --numeric-owner --owner 0 --group 0 --sort=name
 TAR_X = tar -x -J
-COMP = xz -9e
+COMP = xz
 
 ${OUTDIR}/%.5: ${ECLASSDIR}/%
 	rm -f $@ $@.tmp
