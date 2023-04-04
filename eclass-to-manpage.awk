@@ -1,5 +1,5 @@
 #!/usr/bin/awk -f
-# Copyright 2007-2022 Gentoo Authors
+# Copyright 2007-2023 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 # This awk converts the comment documentation found in eclasses
@@ -376,7 +376,7 @@ function _handle_variable() {
 	if (val == $0) {
 		# next try : ${var:=val}
 		op = "?="
-		regex = "^[[:space:]]*:[[:space:]]*[$]{" var_name ":?=(.*)}"
+		regex = "^[[:space:]]*:[[:space:]]*\"?[$]{" var_name ":?=(.*)}\"?"
 		val = gensub(regex, "\\1", 1, $0)
 		if (val == $0) {
 			if (default_unset + required + internal + output_variable == 0)
