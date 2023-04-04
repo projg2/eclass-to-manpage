@@ -120,7 +120,7 @@ function eat_paragraph() {
 		if ($2 ~ /^@/ && $2 !~ /^@(CODE|ROFF|SUBSECTION)$/)
 			break
 
-		sub(/^#[[:space:]]?/, "", $0)
+		sub(/^# ?/, "", $0)
 
 		# Escape . and ' at start of line #420153
 		if ($0 ~ /^[.']/)
