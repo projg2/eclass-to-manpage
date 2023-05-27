@@ -35,7 +35,6 @@
 # @MAINTAINER:
 # <optional; list of contacts, one per line>
 # [@INTERNAL]
-# [@INCLUDES_EPREFIX] (the function outputs path that includes ${EPREFIX})
 # @DEPRECATED: <optional; replacement ("none" for no replacement)>
 # @DESCRIPTION:
 # <required if no @RETURN; blurb about this function>
@@ -46,7 +45,6 @@
 # [@INTERNAL] (internal eclass use variable)
 # [@DEFAULT_UNSET]
 # [@REQUIRED]
-# [@INCLUDES_EPREFIX] (the variable is a path that includes ${EPREFIX})
 # @DEPRECATED: <optional; replacement ("none" for no replacement)>
 # @DESCRIPTION:
 # <required; blurb about this variable>
@@ -60,7 +58,6 @@
 # [@INTERNAL] (internal eclass use variable)
 # [@DEFAULT_UNSET]
 # [@REQUIRED]
-# [@INCLUDES_EPREFIX] (the variable is a path that includes ${EPREFIX})
 # @DEPRECATED: <optional; replacement ("none" for no replacement)>
 # @DESCRIPTION:
 # <required; blurb about this variable>
@@ -289,10 +286,6 @@ function handle_function() {
 		internal = 1
 		getline
 	}
-	if ($2 == "@INCLUDES_EPREFIX") {
-		includes_eprefix = 1
-		getline
-	}
 	if ($2 == "@DEPRECATED:")
 		deprecated = eat_line()
 	if ($2 == "@DESCRIPTION:")
@@ -358,8 +351,6 @@ function _handle_variable() {
 			user_variable = 1
 		else if ($2 == "@OUTPUT_VARIABLE")
 			output_variable = 1
-		else if ($2 == "@INCLUDES_EPREFIX")
-			includes_eprefix = 1
 		else
 			opts = 0
 	}
