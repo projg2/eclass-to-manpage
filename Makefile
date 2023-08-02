@@ -5,6 +5,10 @@ SCRIPT = eclass-to-manpage.awk
 ECLASSDIR = .
 ECLASSES = $(sort $(wildcard ${ECLASSDIR}/*.eclass))
 
+ifeq ($(ECLASSES),)
+$(error ERROR: No eclass files found. Is ECLASSDIR "${ECLASSDIR}" valid?)
+endif
+
 OUTDIR = .
 MANPAGES = $(sort $(patsubst ${ECLASSDIR}/%,${OUTDIR}/%.5,${ECLASSES}))
 ERRFILES = $(sort $(patsubst ${ECLASSDIR}/%,${OUTDIR}/%.5.err,${ECLASSES}))
