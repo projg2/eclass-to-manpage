@@ -471,12 +471,6 @@ BEGIN {
 		} else if ($0 == "# @DEAD") {
 			eclass = "dead"
 			exit(77)
-		} else if ($0 == "# @eclass-begin") {
-			# White list old eclasses that haven't been updated so we can block
-			# new ones from being added to the tree.
-			if (eclass == "")
-				xfail("java documentation not supported")
-			fail("java documentation not supported")
 		} else if ($0 ~ /^# @/)
 			warn("Unexpected tag in \"" state "\" state: " $0)
 	} else if (state == "funcvar") {
