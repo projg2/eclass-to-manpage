@@ -455,7 +455,7 @@ function handle_footer() {
 # Init parser
 #
 BEGIN {
-	state = "header"
+	state = "begin"
 	reporting_bugs = "Please report bugs via https://bugs.gentoo.org/"
 	vcs_url = "https://gitweb.gentoo.org/repo/gentoo.git/log/eclass/@ECLASS@"
 }
@@ -464,13 +464,20 @@ BEGIN {
 # Main parsing routine
 #
 {
+	if (state == "begin") {
+		# Can't do this in BEGIN because FILENAME is not defined there
+		while (getline < FILENAME)
+			if ($0 == "# @DEAD") {
+				eclass = "dead"
+				exit(77)
+			}
+		close(FILENAME)
+		state = "header"
+	}
 	if (state == "header") {
 		if ($0 ~ /^# @ECLASS:/) {
 			handle_eclass()
 			state = "funcvar"
-		} else if ($0 == "# @DEAD") {
-			eclass = "dead"
-			exit(77)
 		} else if ($0 ~ /^# @/)
 			warn("Unexpected tag in \"" state "\" state: " $0)
 	} else if (state == "funcvar") {
