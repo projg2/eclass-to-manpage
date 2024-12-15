@@ -1,5 +1,5 @@
 #!/usr/bin/awk -f
-# Copyright 2007-2023 Gentoo Authors
+# Copyright 2007-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 # This awk converts the comment documentation found in eclasses
@@ -123,12 +123,12 @@ function eat_paragraph() {
 		if ($0 ~ /^[.']/)
 			$0 = "\\&" $0
 
-		# Translate @CODE into .nf/.fi pair
+		# Translate @CODE into .EX/.EE pair and indent it by 2 em
 		if ($1 == "@CODE" && NF == 1) {
 			if (code)
-				$0 = ".fi"
+				$0 = ".EE\n.in"
 			else
-				$0 = ".nf"
+				$0 = ".in +2m\n.EX"
 			code = !code
 		}
 
