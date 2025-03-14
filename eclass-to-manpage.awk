@@ -1,5 +1,5 @@
-#!/usr/bin/awk -f
-# Copyright 2007-2024 Gentoo Authors
+#!/usr/bin/gawk -f
+# Copyright 2007-2025 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 # This awk converts the comment documentation found in eclasses
