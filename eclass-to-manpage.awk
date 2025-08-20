@@ -123,12 +123,13 @@ function eat_paragraph() {
 		if ($0 ~ /^[.']/)
 			$0 = "\\&" $0
 
-		# Translate @CODE into .EX/.EE pair and indent it by 2 em
+		# Translate @CODE into .nf/.fi pair
+		# Also indent by 2 em and set font to Courier Roman
 		if ($1 == "@CODE" && NF == 1) {
 			if (code)
-				$0 = ".EE\n.in"
+				$0 = ".fi\n.ft R\n.in"
 			else
-				$0 = ".in +2m\n.EX"
+				$0 = ".in +2m\n.ft CR\n.nf"
 			code = !code
 		}
 
