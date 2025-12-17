@@ -363,7 +363,7 @@ function _handle_variable() {
 	# extract the default variable value
 	# first try var="val"
 	op = "="
-	regex = "^.*" var_name "=(.*)$"
+	regex = "^[^:]*" var_name "=(.*)$"
 	val = gensub(regex, "\\1", 1, $0)
 	if (val == $0) {
 		# next try : ${var:=val}
