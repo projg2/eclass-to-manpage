@@ -1,3 +1,6 @@
+# Copyright 2019-2026 Gentoo Authors
+# Distributed under the terms of the GNU General Public License v2
+
 ECLASSDIR = .
 ECLASSES := $(sort $(wildcard ${ECLASSDIR}/*.eclass))
 
