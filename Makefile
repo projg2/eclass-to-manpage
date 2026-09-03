@@ -1,50 +1,41 @@
-AWK = gawk
-INSTALL = install
-SCRIPT = eclass-to-manpage.awk
-
 ECLASSDIR = .
-ECLASSES = $(sort $(wildcard ${ECLASSDIR}/*.eclass))
+ECLASSES := $(sort $(wildcard ${ECLASSDIR}/*.eclass))
 
 ifeq ($(ECLASSES),)
 $(error ERROR: No eclass files found. Is ECLASSDIR "${ECLASSDIR}" valid?)
 endif
 
 OUTDIR = .
-MANPAGES = $(sort $(patsubst ${ECLASSDIR}/%,${OUTDIR}/%.5,${ECLASSES}))
-ERRFILES = $(sort $(patsubst ${ECLASSDIR}/%,${OUTDIR}/%.5.err,${ECLASSES}))
+MANPAGES := $(patsubst ${ECLASSDIR}/%,${OUTDIR}/%.5,${ECLASSES})
 
 DESTDIR =
 PREFIX = /usr/local
-BINDIR = $(PREFIX)/bin
 MANDIR = $(PREFIX)/share/man
 MAN5DIR = $(MANDIR)/man5
 
 DISTNAME = eclass-manpages-$(shell date "+%Y%m%d")
 DISTARCH = ${DISTNAME}.tar.xz
-DISTFILES = COPYING Makefile eclass-to-manpage.awk
+DISTFILES = COPYING Makefile
+
+PMAINT = pmaint -q eclass -f man
+INSTALL = install
 TAR = tar --format=ustar --numeric-owner --owner 0 --group 0 --sort=name
 TAR_X = tar -x -J
 COMP = xz
 
-${OUTDIR}/%.5: ${ECLASSDIR}/%
-	rm -f $@ $@.tmp
-	${AWK} -f ${SCRIPT} $< > $@.tmp 2> $@.err || [ $$? -eq 77 ]
-	chmod a-w $@.tmp
-	mv $@.tmp $@
+all: ${MANPAGES}
 
-all:
-	$(MAKE) -k ${MANPAGES}; ret=$$?; [ -z "${ERRFILES}" ] || cat ${ERRFILES}; exit $${ret}
+${MANPAGES} &: ${ECLASSES}
+	${PMAINT} -o "${OUTDIR}/{eclass}.eclass.5" $^
 
 install: all
-	${INSTALL} -d -m 0755 ${DESTDIR}${BINDIR}
-	${INSTALL} -m 0755 ${SCRIPT} ${DESTDIR}${BINDIR}/
 	${INSTALL} -d -m 0755 ${DESTDIR}${MAN5DIR}
 	for f in ${MANPAGES}; do \
 		! [ -s "$${f}" ] || ${INSTALL} -m 0644 $${f} ${DESTDIR}${MAN5DIR}/; \
 	done
 
 clean:
-	rm -f ${MANPAGES} ${ERRFILES}
+	rm -f ${MANPAGES}
 
 dist:
 	rm -r -f ${DISTNAME} ${DISTARCH}
